@@ -57,6 +57,7 @@ function init(){
             field[i][j] = 0;
         }
     }
+    field[5][5] = 1;
 }
 
 
@@ -115,6 +116,7 @@ function move_tetris(){
         }
     }
 }
+//<<ブロックの衝突判定関数>>
 function check_move(move_x, move_y){
     //現在のブロックの形をそのまま次の座標に入れてみて接触するかを確認する
     for(let i = 0; i < tetris_block; i++){
@@ -122,10 +124,12 @@ function check_move(move_x, move_y){
             //new変数に次の座標の位置を入れる
             let new_x = tetris_x + move_x + j;
             let new_y = tetris_y + move_y + i;
-            //テトリスブロックがある時
+            //自分ブロックがある所のフィールドにもブロックがあるか調べるif文
             if(tetris[i][j]){
                 //移動先の座標にブロックがあればfalse
-                if(field[new_y][new_x])return false;
+                if(field[new_y][new_x] || new_y < 0 || new_x < 0 || new_y >= field_row || new_x >= field_col){
+                    return false;
+                }
             }
         }
     }
@@ -146,25 +150,31 @@ document.onkeydown = function(e){
         //キーコード37は「←左」
         //入力されるとtetris_xの値がマイナスされ左に移動する。
         case 37:
-            if(check_move(-1, 0))tetris_x--;
+            if(check_move(-1, 0)){
+                tetris_x--;
+            }
             break;
 
         //キーコード38は「↑上」
                 //入力されるとtetris_yの値がマイナスされ上に移動する。
         case 38:
-            if(check_move(0, -1))tetris_y--;
+            if(check_move(0, -1)){
+                tetris_y--;
+            }
             break;
 
         //キーコード39は「→右」
         //入力されるとtetris_xの値がマイナスされ右に移動する。
         case 39:
-            if(check_move(1, 0))tetris_x++;
+            if(check_move(1, 0)){
+            tetris_x++;}
             break;
 
         //キーコード37は「↓下」
         //入力されるとtetris_yの値がマイナスされ下に移動する。
         case 40:
-            if(check_move(0, 1))tetris_y++;
+            if(check_move(0, 1)){
+            tetris_y++;}
             break;
 
         //キーコード32は「スペース」
