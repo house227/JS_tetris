@@ -127,7 +127,8 @@ function check_move(move_x, move_y){
             //自分ブロックがある所のフィールドにもブロックがあるか調べるif文
             if(tetris[i][j]){
                 //移動先の座標にブロックがあればfalse
-                if(field[new_y][new_x] || new_y < 0 || new_x < 0 || new_y >= field_row || new_x >= field_col){
+                if(new_y < 0 || new_x < 0 || new_y >= field_row || new_x >= field_col || 
+                    field[new_y][new_x]){
                     return false;
                 }
             }
@@ -135,6 +136,30 @@ function check_move(move_x, move_y){
     }
     return true;
 }
+
+//<<回転時用の関数>>
+function rotate(){
+    //開店後のテトリスを入れる配列。2次元の初期化は出来ないのでまず１次元
+    let new_tetris = [];
+
+    //外がY軸内がX軸
+    for(let i = 0; i < tetris_block; i++){
+        //作った1次元配列の[i]番目に配列を入れ、2次元配列にする。
+        new_tetris[i] = [];
+        for(let j = 0; j < tetris_block; j++){
+            //開店後の配列のデータを入れる。
+            //（新しい位置の考え方）テトリスの新しい位置を決める為に、new_tetrisの[0][0]の位置から決めないといけない。
+            //new_tetris[0][0]の位置へtetris配列からデータを移さないといけないが、そのまま移すと回転していないので、
+            //テトリスのブロックの現在の位置と新しい位置を図に表してみて、現在の図を90°右へ回転してみる。
+            //new_tetris[0][0]にコピーするべき場所の値はtetris[0][3]のデータであるとわかる。
+            //新しい配列のx軸が増えると現在の配列のy軸が減る
+            //○newのi(Y軸)が増えると旧のi(X軸)が増える
+            new_tetris[i][j] = tetris[tetris_block - j - 1][i];
+        }
+    }
+    return new_tetris;
+}
+
 
 
 //<<キーボード操作によるイベントの発生>>
@@ -179,6 +204,7 @@ document.onkeydown = function(e){
 
         //キーコード32は「スペース」
         case 32:
+            tetris = rotate();
             break;
     }
     show_field();
