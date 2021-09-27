@@ -26,26 +26,91 @@ can.width = screen_width;
 can.height = screen_height;
 can.style.border = "4px solid #555"
 
+
+
 //<<テトリスブロックの作成。>>
 
-//2次元配列で4x4の16マスを作る
-//0が余白 1がブロック部分
-let tetris = [
-    [0,0,0,0],
-    [1,1,0,0],
-    [0,1,1,0],
-    [0,0,0,0]
+//7種類のブロック情報を保存する3次元配列を作る。
+    //その中に2次元配列で4x4の16マスを作る
+    //中のデータは0が余白 1がブロック部分
+const tetris_types = [
+    //0番 空
+    [],
+    //1番 I型
+    [
+        [0,0,0,0],
+        [1,1,1,1],
+        [0,0,0,0],
+        [0,0,0,0]
+    ],
+    //2番 L型
+    [
+        [0,1,0,0],
+        [0,1,0,0],
+        [0,1,1,0],
+        [0,0,0,0]
+    ],
+    //3番 J型
+    [
+        [0,0,1,0],
+        [0,0,1,0],
+        [0,1,1,0],
+        [0,0,0,0]
+    ],
+    //4番 T型
+    [
+        [0,1,0,0],
+        [0,1,1,0],
+        [0,1,0,0],
+        [0,0,0,0]
+    ],
+    //5番 O型
+    [
+        [0,0,0,0],
+        [0,1,1,0],
+        [0,1,1,0],
+        [0,0,0,0]
+    ],
+    //6番 Z
+    [
+        [0,0,0,0],
+        [1,1,0,0],
+        [0,1,1,0],
+        [0,0,0,0]
+    ],
+    //7番 S
+    [
+        [0,0,0,0],
+        [0,1,1,0],
+        [1,1,0,0],
+        [0,0,0,0]
+    ]
 ];
 
-//テトリスブロックの座標を保存する（x軸、y軸）
+const start_x = (field_col/2) - (tetris_block / 2);
+const start_y = 0;
+
+let tetris;
+
+
+//<<テトリスブロックの座標を保存する（x軸、y軸）>>
 //下記のキー入力イベントによって変動する
-let tetris_x = 0;
-let tetris_y = 0;
+let tetris_x = start_x;
+let tetris_y = start_y;
+
+//テトリスの形の入った3次元配列の番号を入れる変数
+let tetris_pickup;
+
 
 //<<フィールドの作成>>
 //上記のフィールドサイズに合わせた10x20の配列をfor文で作成
 //JSは２次元配列の初期化が無いのでとりあえず１次元を定義しておく。
 let field = [];
+
+//テトリスの番号をランダム関数で1~7選択し変数に代入してする
+tetris_pickup = Math.floor(Math.random() * (tetris_types.length - 1) ) + 1;
+//ランダムで選ばれた番号の配列が代入される
+tetris = tetris_types[tetris_pickup];
 
 //テトリスの落下速度
 let game_speed = 1000;
@@ -75,6 +140,7 @@ move_tetris();
 
 
 //<<ブロックを一つ描画する関数>>
+
 function show_block(i, j){
 //〇フィールド表示での呼び出しでは、ブロックが移動する必要は無し。
     //よってi,jに座標は足されていない。
@@ -119,7 +185,9 @@ function move_tetris(){
     for(let i = 0; i < tetris.length; i++){
         for(let j = 0; j < tetris.length; j++){
             if(tetris[i][j] == 1){
-                show_block(tetris_y+i, tetris_x+j);
+                //tetris_x,yは4x4のテトリス配列の[0][0]の位置を示すので
+                //iとjのデータを足してあげないといけない。
+                show_block(tetris_y + i, tetris_x + j);
             }
         }
     }
@@ -186,7 +254,7 @@ function fix_tetris(){
         for(let j = 0; j < tetris_block; j++){
             //テトリスブロックがある時
             if(tetris[i][j]){
-                //現在の位置
+                //現在の位置(底着きした位置)のフィールドにブロックを置く
                 field[tetris_y + i][tetris_x + j] = 1;
             }
         }
@@ -208,8 +276,9 @@ function drop_tetris(){
 
         //底/ブロックに着いた時に固定する関数
         fix_tetris();
-        tetris_x = 0;
-        tetris_y = 0;
+        //底着き後
+        tetris_x = start_x;
+        tetris_y = start_y;
     }
 
 }
