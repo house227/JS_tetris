@@ -50,7 +50,7 @@ let field = [];
 //テトリスの落下速度
 let game_speed = 1000;
 
-//デフォルト速度で1秒に一回drop_tetrisが実行される関数
+//<<デフォルト速度で1秒に一回drop_tetrisが実行される関数>>
 setInterval( drop_tetris, game_speed )
 
 
@@ -135,11 +135,12 @@ function check_move(move_x, move_y, check_tetris){
     //現在のブロックの形をそのまま次の座標に入れてみて接触するかを確認する
     for(let i = 0; i < tetris_block; i++){
         for(let j = 0; j < tetris_block; j++){
-            //new変数に次の座標の位置を入れる
-            let new_x = tetris_x + move_x + j;
-            let new_y = tetris_y + move_y + i;
             //自分ブロックがある所のフィールドにもブロックがあるか調べるif文
             if(check_tetris[i][j]){
+                //new変数に次の座標の位置を入れる
+                let new_x = tetris_x + move_x + j;
+                let new_y = tetris_y + move_y + i;
+
                 //移動先の座標にブロックがあればfalse
                 if(new_y < 0 || new_x < 0 || new_y >= field_row || new_x >= field_col || 
                     field[new_y][new_x]){
@@ -178,13 +179,37 @@ function rotate(){
     return new_tetris;
 }
 
-//テトリスが1コマ落ちる関数
+//<<ブロックを固定する関数>>
+function fix_tetris(){
+    for(let i = 0; i < tetris_block; i++){
+        
+        for(let j = 0; j < tetris_block; j++){
+            //テトリスブロックがある時
+            if(tetris[i][j]){
+                //現在の位置
+                field[tetris_y + i][tetris_x + j] = 1;
+            }
+        }
+    }
+}
+
+
+//<<テトリスが1コマ落ちる関数>>
 function drop_tetris(){
-    //キーボードで下↓を押した時と同じ動き
+    //キーボードで下↓を押した時と同じ動き。
+    //下へ動けるか確かめてから、下に落ちている
     if(check_move(0, 1)){
         tetris_y++;
         show_field();
         move_tetris();
+
+    //下に動けない時(底に着いた時)のelse。
+    }else{
+
+        //底/ブロックに着いた時に固定する関数
+        fix_tetris();
+        tetris_x = 0;
+        tetris_y = 0;
     }
 
 }
