@@ -47,6 +47,13 @@ let tetris_y = 0;
 //JSは２次元配列の初期化が無いのでとりあえず１次元を定義しておく。
 let field = [];
 
+//テトリスの落下速度
+let game_speed = 1000;
+
+//デフォルト速度で1秒に一回drop_tetrisが実行される関数
+setInterval( drop_tetris, game_speed )
+
+
 //フィールド本体の初期化関数
 function init(){
     //10x20のフィールド配列のループ
@@ -157,14 +164,29 @@ function rotate(){
             //開店後の配列のデータを入れる。
             //（新しい位置の考え方）テトリスの新しい位置を決める為に、new_tetrisの[0][0]の位置から決めないといけない。
             //new_tetris[0][0]の位置へtetris配列からデータを移さないといけないが、そのまま移すと回転していないので、
-            //テトリスのブロックの現在の位置と新しい位置を図に表してみて、現在の図を90°右へ回転してみる。
-            //new_tetris[0][0]にコピーするべき場所の値はtetris[0][3]のデータであるとわかる。
-            //新しい配列のx軸が増えると現在の配列のy軸が減る
-            //○newのi(Y軸)が増えると旧のi(X軸)が増える
+              //テトリスのブロックの現在の位置と新しい位置を図に表してみて、現在の図を90°右へ回転してみる。
+            //new_tetris[0][0]にコピーするべき場所の値はtetris[0][3]のデータであるとわかるので、
+              //90°回転した後の位置データを代入していく。
+            //90°回転後の数値を書き出すと…新( x(0),y(0) )→旧(y(3),x(0))。(1,0)→(3,1)。(2,0)→(3,2)。(3,0)→(3,3)。
+              //(0,1)→(2,0)。…
+            //図がテトリスが90°時計回りするので[ i(X軸), j(Y軸) ]が[ j(Y軸), i(X軸) ]になる。
+              //Y軸はそのまま使えるがX軸は[ tetris_block(中身は4) - j - 1 ]で減らしていかないといけない。
+              //-1する意味は、配列が0~3の為
             new_tetris[i][j] = tetris[tetris_block - j - 1][i];
         }
     }
     return new_tetris;
+}
+
+//テトリスが1コマ落ちる関数
+function drop_tetris(){
+    //キーボードで下↓を押した時と同じ動き
+    if(check_move(0, 1)){
+        tetris_y++;
+        show_field();
+        move_tetris();
+    }
+
 }
 
 
@@ -199,14 +221,16 @@ document.onkeydown = function(e){
         //入力されるとtetris_xの値がマイナスされ右に移動する。
         case 39:
             if(check_move(1, 0)){
-            tetris_x++;}
+            tetris_x++;
+        }
             break;
 
         //キーコード37は「↓下」
         //入力されるとtetris_yの値がマイナスされ下に移動する。
         case 40:
             if(check_move(0, 1)){
-            tetris_y++;}
+            tetris_y++;
+        }
             break;
 
         //キーコード32は「スペース」
@@ -216,7 +240,7 @@ document.onkeydown = function(e){
                 //if文で「現在の位置で回転して大丈夫か」を上記の衝突判定関数で調べる
                 //引数は(現在の位置(0), 現在の位置(0), 回転後のテトリス配列)
             if(check_move(0, 0, rotate_cheak_tetris)){
-                tetris = rotate();
+                tetris = rotate_cheak_tetris;
             }
             break;
     }
