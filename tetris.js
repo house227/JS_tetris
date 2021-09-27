@@ -26,6 +26,24 @@ can.width = screen_width;
 can.height = screen_height;
 can.style.border = "4px solid #555"
 
+const tetris_colors = [
+    //0番 空
+    "black",
+    //1番 水色
+    "apua",
+    //2番 オレンジ
+    "orange",
+    //3番 青
+    "blue",
+    //4番 ピンク
+    "fuchsia",
+    //5番 黄色
+    "yellow",
+    //6番 赤
+    "red",
+    //7番 緑
+    "lime"
+];
 
 
 //<<テトリスブロックの作成。>>
@@ -129,7 +147,7 @@ function init(){
             field[i][j] = 0;
         }
     }
-    field[5][5] = 1;
+    // field[5][5] = 1;
 }
 
 
@@ -141,7 +159,7 @@ move_tetris();
 
 //<<ブロックを一つ描画する関数>>
 
-function show_block(i, j){
+function show_block(i, j, c){
 //〇フィールド表示での呼び出しでは、ブロックが移動する必要は無し。
     //よってi,jに座標は足されていない。
 //〇ブロック表示での呼び出しでは、移動の度に差分を足された変数が渡される。
@@ -150,7 +168,9 @@ function show_block(i, j){
 let print_x = j * block_size;
 let print_y = i * block_size;
 
-con.fillStyle = "red";
+//ブロックの色はカラー配列から引数で渡されたブロックの種類番号に応じた色を代入
+con.fillStyle = tetris_colors[c];
+
 //.fillRect()で正方形の作成。引数は(X座標,Y座標,X軸大きさ,Y軸大きさ) 変数も可
 //上記の座標に対して、サイズを当てはめる
 con.fillRect(print_x,print_y,block_size,block_size);
@@ -171,7 +191,7 @@ function show_field(){
     for(let i = 0; i < field_row; i++){
         for(let j = 0; j < field_col; j++){
             if(field[i][j]){
-                show_block(i, j);
+                show_block(i, j, field[i][j], );
             }
         }
     }
@@ -187,7 +207,7 @@ function move_tetris(){
             if(tetris[i][j] == 1){
                 //tetris_x,yは4x4のテトリス配列の[0][0]の位置を示すので
                 //iとjのデータを足してあげないといけない。
-                show_block(tetris_y + i, tetris_x + j);
+                show_block(tetris_y + i, tetris_x + j, tetris_pickup);
             }
         }
     }
@@ -255,7 +275,7 @@ function fix_tetris(){
             //テトリスブロックがある時
             if(tetris[i][j]){
                 //現在の位置(底着きした位置)のフィールドにブロックを置く
-                field[tetris_y + i][tetris_x + j] = 1;
+                field[tetris_y + i][tetris_x + j] = tetris_pickup;
             }
         }
     }
@@ -276,7 +296,12 @@ function drop_tetris(){
 
         //底/ブロックに着いた時に固定する関数
         fix_tetris();
-        //底着き後
+        
+        //底着き後、新たに乱数でブロック種類を選択
+        tetris_pickup = Math.floor(Math.random() * (tetris_types.length - 1) ) + 1;
+        tetris = tetris_types[tetris_pickup];
+
+        //底着き後、座標をスタート地点に戻す
         tetris_x = start_x;
         tetris_y = start_y;
     }
