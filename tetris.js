@@ -105,6 +105,7 @@ function show_field(){
 }
 
 //<<テトリスブロックの表示>>
+
 function move_tetris(){
 
     //0が余白 1がブロック部分のtetris配列をforで回してブロックを表示させる
@@ -117,7 +118,13 @@ function move_tetris(){
     }
 }
 //<<ブロックの衝突判定関数>>
-function check_move(move_x, move_y){
+//引数は移動時では(移動後のⅩ軸, 移動後のＹ軸)、回転時は(現在の位置(0), 現在の位置(0), 回転後のテトリス配列)
+
+function check_move(move_x, move_y, check_tetris){
+    //移動時と回転時で引数の数が違うので、「check_tetrisが無ければ、tetris配列を入れる」というif文を置く
+    if(check_tetris == undefined){
+        check_tetris = tetris;
+    }
     //現在のブロックの形をそのまま次の座標に入れてみて接触するかを確認する
     for(let i = 0; i < tetris_block; i++){
         for(let j = 0; j < tetris_block; j++){
@@ -125,7 +132,7 @@ function check_move(move_x, move_y){
             let new_x = tetris_x + move_x + j;
             let new_y = tetris_y + move_y + i;
             //自分ブロックがある所のフィールドにもブロックがあるか調べるif文
-            if(tetris[i][j]){
+            if(check_tetris[i][j]){
                 //移動先の座標にブロックがあればfalse
                 if(new_y < 0 || new_x < 0 || new_y >= field_row || new_x >= field_col || 
                     field[new_y][new_x]){
@@ -170,7 +177,7 @@ document.onkeydown = function(e){
 
     //どのキーが押されたかをチェックする
     switch(e.keyCode){
-        //check_move関数は動けるかどうかを確認する関数で引数は(移動するⅩ軸,　移動するＹ軸)
+        //check_move関数は動けるかどうかを確認する関数で引数は(移動後のⅩ軸, 移動後のＹ軸)
 
         //キーコード37は「←左」
         //入力されるとtetris_xの値がマイナスされ左に移動する。
@@ -204,7 +211,13 @@ document.onkeydown = function(e){
 
         //キーコード32は「スペース」
         case 32:
-            tetris = rotate();
+            //回転して大丈夫かチェックする為にまず仮の変数に回転後のテトリス配列を入れる
+            let rotate_cheak_tetris = rotate();
+                //if文で「現在の位置で回転して大丈夫か」を上記の衝突判定関数で調べる
+                //引数は(現在の位置(0), 現在の位置(0), 回転後のテトリス配列)
+            if(check_move(0, 0, rotate_cheak_tetris)){
+                tetris = rotate();
+            }
             break;
     }
     show_field();
