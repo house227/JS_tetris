@@ -28,21 +28,21 @@ can.style.border = "4px solid #555"
 
 const tetris_colors = [
     //0番 空
-    "black",
+    "#000",
     //1番 水色
-    "apua",
+    "#6CF",
     //2番 オレンジ
-    "orange",
+    "#F92",
     //3番 青
-    "blue",
+    "#66F",
     //4番 ピンク
-    "fuchsia",
+    "#C5C",
     //5番 黄色
-    "yellow",
+    "#FD2",
     //6番 赤
-    "red",
+    "#F44",
     //7番 緑
-    "lime"
+    "#5B5"
 ];
 
 
