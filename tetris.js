@@ -1,3 +1,4 @@
+
 //<<変数の定義>>
 
 //ブロックのセルサイズ
@@ -128,7 +129,7 @@ let next_tetris;
 let field = [];
 
 //テトリスの落下速度
-let game_speed = 100;
+let game_speed = 1000;
 
 //ゲームオーバーフラグ
 let over = false;
