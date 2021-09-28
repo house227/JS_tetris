@@ -125,13 +125,23 @@ let tetris_pickup;
 //JSは２次元配列の初期化が無いのでとりあえず１次元を定義しておく。
 let field = [];
 
+//テトリスの落下速度
+let game_speed = 10;
+
+//ゲームオーバーフラグ
+let over = false;
+
+
 //テトリスの番号をランダム関数で1~7選択し変数に代入してする
 tetris_pickup = Math.floor(Math.random() * (tetris_types.length - 1) ) + 1;
 //ランダムで選ばれた番号の配列が代入される
 tetris = tetris_types[tetris_pickup];
 
-//テトリスの落下速度
-let game_speed = 1000;
+
+
+init();
+show_field();
+move_tetris();
 
 //<<デフォルト速度で1秒に一回drop_tetrisが実行される関数>>
 setInterval( drop_tetris, game_speed )
@@ -143,17 +153,15 @@ function init(){
     for(let i =0; i < field_row; i++){
         //1次元配列field[i]に配列を入れる事で2次元配列にする。
         field[i] = []; 
+
         for(let j = 0; j < field_col; j++){
             field[i][j] = 0;
         }
     }
-    // field[5][5] = 1;
 }
 
 
-init();
-show_field();
-move_tetris();
+
 
 
 
@@ -195,16 +203,28 @@ function show_field(){
             }
         }
     }
+    if(over){
+        let s="GAME OVER";
+        con.font = "40px 'ＭＳ ゴシック'";
+        let w = con.measureText(s).width;
+        let x = screen_width/2 - w/2;
+        let y = screen_height/2 - 20;
+        con.lineWidth = 4;
+        con.strokeText(s,x,y);
+        con.fillStyle="white";
+        con.fillText(s,x,y);
+    }
 }
+
 
 //<<テトリスブロックの表示>>
 
 function move_tetris(){
 
     //0が余白 1がブロック部分のtetris配列をforで回してブロックを表示させる
-    for(let i = 0; i < tetris.length; i++){
-        for(let j = 0; j < tetris.length; j++){
-            if(tetris[i][j] == 1){
+    for(let i = 0; i < tetris_block; i++){
+        for(let j = 0; j < tetris_block; j++){
+            if(tetris[i][j]){
                 //tetris_x,yは4x4のテトリス配列の[0][0]の位置を示すので
                 //iとjのデータを足してあげないといけない。
                 show_block(tetris_y + i, tetris_x + j, tetris_pickup);
@@ -281,21 +301,61 @@ function fix_tetris(){
     }
 }
 
+//ラインが揃ったかチェックして消す
+function check_line(){
+    
+    //揃ったラインを数えるカウント変数
+    let line_cnt = 0
+    for(let i = 0; i < field_row; i++){
+        
+        //真偽を保存しておく変数
+        let flag = true;
+
+        //1行ずつフィールドにラインが揃った行が存在してるか調べる多重ループ
+        for(let j = 0; j < field_col; j++){
+            
+            //i番目の行のブロックを1つずつ見て、全て1ならラインが揃っているので通り抜ける
+            //0が含まれていればbreakで抜ける。
+            if(!field[i][j]){
+                flag = false;
+                break;
+            }
+        }
+        //ラインが揃っていた場合のみ通る
+        if(flag){
+            //揃ったラインの数をカウント
+            line_cnt++;
+
+            //ラインを消す処理
+            for(let y = i; y > 0; y--){
+                for(let x = 0; x < field_col; x++){
+                    field[y][x] = field[y-1][x];
+                }
+            }
+        }
+    }
+}
+
+
 
 //<<テトリスが1コマ落ちる関数>>
 function drop_tetris(){
+
+    //もしゲームオーバーなら処理をスキップ
+    if(over) {
+        return;
+    }
     //キーボードで下↓を押した時と同じ動き。
     //下へ動けるか確かめてから、下に落ちている
     if(check_move(0, 1)){
         tetris_y++;
-        show_field();
-        move_tetris();
-
+        
     //下に動けない時(底に着いた時)のelse。
     }else{
 
         //底/ブロックに着いた時に固定する関数
         fix_tetris();
+        check_line();
         
         //底着き後、新たに乱数でブロック種類を選択
         tetris_pickup = Math.floor(Math.random() * (tetris_types.length - 1) ) + 1;
@@ -304,8 +364,23 @@ function drop_tetris(){
         //底着き後、座標をスタート地点に戻す
         tetris_x = start_x;
         tetris_y = start_y;
-    }
 
+        //天井に着いた時の処理。引数は現在位置(0,0)(スタート地点)
+            if(!check_move(0,0)){
+                over = true;
+                    let s="GAME OVER";
+                    con.font = "40px 'ＭＳ ゴシック'";
+                    let w = con.measureText(s).width;
+                    let x = screen_width/2 - w/2;
+                    let y = screen_height/2 - 20;
+                    con.lineWidth = 4;
+                    con.strokeText(s,x,y);
+                    con.fillStyle="white";
+                    con.fillText(s,x,y);
+            }
+    }
+    show_field();
+    move_tetris();
 }
 
 
@@ -315,6 +390,11 @@ function drop_tetris(){
 //onkeydownは押されたキーを検知し、イベントを実行・処理を指定する際に割り込みで実行する。
 //キーボード入力された時引数(e)を持って呼び出される
 document.onkeydown = function(e){
+
+    //もしゲームオーバーなら処理をスキップ
+    if(over){
+        return;
+    }
 
     //どのキーが押されたかをチェックする
     switch(e.keyCode){
