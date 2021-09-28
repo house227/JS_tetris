@@ -118,6 +118,8 @@ let tetris_y = start_y;
 
 //テトリスの形の入った3次元配列の番号を入れる変数
 let tetris_pickup;
+//次のテトリス番号を入れる変数
+let next_tetris;
 
 
 //<<フィールドの作成>>
@@ -126,22 +128,18 @@ let tetris_pickup;
 let field = [];
 
 //テトリスの落下速度
-let game_speed = 10;
+let game_speed = 100;
 
 //ゲームオーバーフラグ
 let over = false;
 
 
-//テトリスの番号をランダム関数で1~7選択し変数に代入してする
-tetris_pickup = Math.floor(Math.random() * (tetris_types.length - 1) ) + 1;
-//ランダムで選ばれた番号の配列が代入される
-tetris = tetris_types[tetris_pickup];
 
 
 
+//イニシャライズにより初期化してスタート
 init();
-show_field();
-move_tetris();
+
 
 //<<デフォルト速度で1秒に一回drop_tetrisが実行される関数>>
 setInterval( drop_tetris, game_speed )
@@ -158,8 +156,27 @@ function init(){
             field[i][j] = 0;
         }
     }
+    //最初のテトリスの為にネクストテトリスを初期化
+    next_tetris = Math.floor(Math.random() * (tetris_types.length - 1) ) + 1;
+
+    set_tetris();
+    show_all();
 }
 
+function set_tetris(){
+    //ネクストテトリスを現在のテトリスにする
+    tetris_pickup = next_tetris;
+
+    //ランダムで選ばれた番号の配列が代入される
+    tetris = tetris_types[tetris_pickup];
+
+    //テトリスの番号をランダム関数で1~7選択し変数に代入してする
+    //ネクスト欄に入るテトリス番号をいれる。
+    next_tetris = Math.floor(Math.random() * (tetris_types.length - 1) ) + 1;
+
+    tetris_x = start_x;
+    tetris_y = start_y;
+}
 
 
 
@@ -191,7 +208,7 @@ con.strokeRect(print_x,print_y,block_size,block_size);
 
 
 //<<フィールドの表示>>
-function show_field(){
+function show_all(){
     //  テトリスが移動するたびに前のテトリスを一度contextから消す
     //.crearRect()の引数には(開始地点のX座標,Y座標,　終了地点のX軸大きさ,Y軸大きさ)を入れる
     con.clearRect(0,0,screen_width,screen_height);
@@ -200,6 +217,21 @@ function show_field(){
         for(let j = 0; j < field_col; j++){
             if(field[i][j]){
                 show_block(i, j, field[i][j], );
+            }
+        }
+    }
+
+
+//<<テトリスブロックの表示>>
+
+    //0が余白 1がブロック部分のtetris配列をforで回してブロックを表示させる
+    for(let i = 0; i < tetris_block; i++){
+        for(let j = 0; j < tetris_block; j++){
+            //テトリス本体の描画
+            if(tetris[i][j]){
+                //tetris_x,yは4x4のテトリス配列の[0][0]の位置を示すので
+                //iとjのデータを足してあげないといけない。
+                show_block(tetris_y + i, tetris_x + j, tetris_pickup);
             }
         }
     }
@@ -213,23 +245,6 @@ function show_field(){
         con.strokeText(s,x,y);
         con.fillStyle="white";
         con.fillText(s,x,y);
-    }
-}
-
-
-//<<テトリスブロックの表示>>
-
-function move_tetris(){
-
-    //0が余白 1がブロック部分のtetris配列をforで回してブロックを表示させる
-    for(let i = 0; i < tetris_block; i++){
-        for(let j = 0; j < tetris_block; j++){
-            if(tetris[i][j]){
-                //tetris_x,yは4x4のテトリス配列の[0][0]の位置を示すので
-                //iとjのデータを足してあげないといけない。
-                show_block(tetris_y + i, tetris_x + j, tetris_pickup);
-            }
-        }
     }
 }
 //<<ブロックの衝突判定関数>>
@@ -358,8 +373,9 @@ function drop_tetris(){
         check_line();
         
         //底着き後、新たに乱数でブロック種類を選択
-        tetris_pickup = Math.floor(Math.random() * (tetris_types.length - 1) ) + 1;
-        tetris = tetris_types[tetris_pickup];
+        // tetris_pickup = Math.floor(Math.random() * (tetris_types.length - 1) ) + 1;
+        // tetris = tetris_types[tetris_pickup];
+        set_tetris();
 
         //底着き後、座標をスタート地点に戻す
         tetris_x = start_x;
@@ -368,19 +384,9 @@ function drop_tetris(){
         //天井に着いた時の処理。引数は現在位置(0,0)(スタート地点)
             if(!check_move(0,0)){
                 over = true;
-                    let s="GAME OVER";
-                    con.font = "40px 'ＭＳ ゴシック'";
-                    let w = con.measureText(s).width;
-                    let x = screen_width/2 - w/2;
-                    let y = screen_height/2 - 20;
-                    con.lineWidth = 4;
-                    con.strokeText(s,x,y);
-                    con.fillStyle="white";
-                    con.fillText(s,x,y);
             }
     }
-    show_field();
-    move_tetris();
+    show_all();
 }
 
 
@@ -443,6 +449,5 @@ document.onkeydown = function(e){
             }
             break;
     }
-    show_field();
-    move_tetris();
+    show_all();
 }
