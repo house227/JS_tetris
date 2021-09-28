@@ -135,9 +135,6 @@ let game_speed = 1000;
 let over = false;
 
 
-
-
-
 //イニシャライズにより初期化してスタート
 init();
 
@@ -178,8 +175,6 @@ function set_tetris(){
     tetris_x = start_x;
     tetris_y = start_y;
 }
-
-
 
 
 
